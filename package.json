@@ -1,0 +1,31 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "watch": "vite build --watch"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^5.0.1",
+    "@types/node": "^18.15.11",
+    "@vitejs/plugin-legacy": "^4.0.2",
+    "autoprefixer": "^10.4.14",
+    "sass": "^1.60.0",
+    "typescript": "^5.0.3",
+    "vite": "^4.3.9",
+    "vite-plugin-sass-glob-import": "^2.0.0"
+  },
+  "browserslist": [
+    "defaults"
+  ],
+  "dependencies": {
+    "@fancyapps/ui": "^5.0.19",
+    "foundation-sites": "^6.7.5",
+    "micromodal": "^0.4.10",
+    "normalize": "^0.3.1",
+    "normalize.css": "^8.0.1",
+    "terser": "^5.18.1"
+  }
+}

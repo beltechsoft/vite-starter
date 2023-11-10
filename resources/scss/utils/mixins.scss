@@ -1,0 +1,35 @@
+/* stylelint-disable scss/no-global-function-names */
+@mixin media($values...) {
+  @for $i from 1 through length($values) {
+    $value: nth($values, $i);
+    $str: breakpoint($value);
+    $bp: index($-zf-breakpoints-keys, nth($value, 1));
+    $pbp: index($-zf-breakpoints-keys, $print-breakpoint);
+
+    // Direction of media query (up, down, or only)
+    $dir: if(length($value) > 1, nth($value, 2), up);
+    $old-zf-size: null;
+
+    @if global-variable-exists(-zf-size) {
+      $old-zf-size: $-zf-size;
+    }
+
+    $-zf-size: nth($value, 1) !global;
+
+    @if $str == "" {
+      @content;
+    } @else {
+      @if $bp != null and ($bp <= $pbp or $dir == down) {
+        @media print, screen and #{$str} {
+          @content;
+        }
+      } @else {
+        @media screen and #{$str} {
+          @content;
+        }
+      }
+    }
+
+    $-zf-size: $old-zf-size !global;
+  }
+}
