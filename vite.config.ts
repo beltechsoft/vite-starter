@@ -1,23 +1,19 @@
-/*********************************************************************************************************************/
-/**********                                              Vite                                               **********/
-/*********************************************************************************************************************/
-
 import { defineConfig, UserConfig } from 'vite';
 import path from 'path';
-import legacy from '@vitejs/plugin-legacy';
 import autoprefixer from 'autoprefixer';
-import pkg from './package.json';
-import alias from '@rollup/plugin-alias'
 import sassGlobImports from 'vite-plugin-sass-glob-import';
+import glob from 'glob';
+import { fileURLToPath } from 'node:url';
+import babel from 'rollup-plugin-babel';
+import removeConsole from "vite-plugin-remove-console";
+
 
 const PATHS = {
     src: path.join(__dirname, './resources'),
-    entries: path.join(__dirname, './resources/entries'),
     dist: path.join(__dirname, './assets'),
 }
 
 const isProduction = process.env.NODE_ENV === 'production' && !process.argv.includes('--watch');
-
 const config = <UserConfig> defineConfig({
 
     build: {
@@ -25,13 +21,23 @@ const config = <UserConfig> defineConfig({
         minify: isProduction,
         rollupOptions: {
             input: {
-                'application': PATHS.entries  + '/application.js',
+                application: PATHS.src + '/js/application.js',
+                vendors: PATHS.src + '/js/vendors.js',
+                applicationCss: PATHS.src + '/scss/application.scss',
+
+
+                ...Object.fromEntries(
+                    glob.sync(PATHS.src + '/js/pages/**/*.js').map(file => [
+                        path.relative(PATHS.src + '/js', file.slice(0, file.length - path.extname(file).length)),
+                        fileURLToPath(new URL(file, import.meta.url))
+                    ])
+                ),
             },
             output: {
-                dir:  PATHS.dist,
+                dir: PATHS.dist,
                 entryFileNames: 'js/[name].js',
                 assetFileNames: 'css/[name].[ext]',
-            },
+            }
         }
     },
     css: {
@@ -42,8 +48,8 @@ const config = <UserConfig> defineConfig({
         }
     },
     plugins: [
-        alias(),
         sassGlobImports(),
+       
     ],
     resolve: {
         alias: {
@@ -55,12 +61,26 @@ const config = <UserConfig> defineConfig({
 
 // Babel
 if (isProduction) {
-    config.plugins?.unshift(
-        legacy({
-            targets: pkg.browserslist
-        })
+    config.plugins?.push( 
+        babel({
+             presets: [
+                [
+                    '@babel/preset-env', {
+                        targets: [  
+                            "last 2 Chrome versions",
+                            "last 2 Firefox versions",
+                            "Safari >= 9",
+                            "IE >= 10"
+                        ], 
+                        modules: false
+                    },
+                ],
+            ],
+        }),
     );
-}
+    
+    config.plugins?.push(removeConsole())
 
+}
 
 export default config;
