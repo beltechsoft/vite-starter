@@ -27,16 +27,24 @@ const config = <UserConfig> defineConfig({
 
 
                 ...Object.fromEntries(
-                    glob.sync(PATHS.src + '/js/pages/**/*.js').map(file => [
-                        path.relative(PATHS.src + '/js', file.slice(0, file.length - path.extname(file).length)),
-                        fileURLToPath(new URL(file, import.meta.url))
-                    ])
+                    glob.sync(PATHS.src + '/js/pages/**/*.js').map(file => {
+                       return [
+                            path.relative(PATHS.src + '/js', file.slice(0, file.length - path.extname(file).length)),
+                            file
+                        ]
+                    })
                 ),
             },
             output: {
                 dir: PATHS.dist,
                 entryFileNames: 'js/[name].js',
-                assetFileNames: 'css/[name].[ext]',
+                assetFileNames: (assetInfo) => {
+                    if(/\.css$/.test(assetInfo.name) && assetInfo.name.includes('resources/scss/')){
+                        return assetInfo.name?.replace('resources/scss/', 'css/');
+                    }
+
+                    return'css/[name].[ext]';
+                },
             }
         }
     },
