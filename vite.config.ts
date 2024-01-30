@@ -6,7 +6,8 @@ import glob from 'glob';
 import { fileURLToPath } from 'node:url';
 import babel from 'rollup-plugin-babel';
 import removeConsole from "vite-plugin-remove-console";
-
+import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { normalizePath } from 'vite'
 
 const PATHS = {
     src: path.join(__dirname, './resources'),
@@ -14,8 +15,7 @@ const PATHS = {
 }
 
 const isProduction = process.env.NODE_ENV === 'production' && !process.argv.includes('--watch');
-const config = <UserConfig> defineConfig({
-
+const config = <UserConfig> defineConfig({    
     build: {
         sourcemap: !isProduction,
         minify: isProduction,
@@ -57,7 +57,14 @@ const config = <UserConfig> defineConfig({
     },
     plugins: [
         sassGlobImports(),
-       
+        viteStaticCopy({
+            targets: [
+              {
+                src:  normalizePath(path.resolve(__dirname, './resources/assets/*')),
+                dest: normalizePath(path.resolve(__dirname, './assets'))
+              }
+            ]
+          })
     ],
     resolve: {
         alias: {
