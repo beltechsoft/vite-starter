@@ -4,7 +4,7 @@ import sassGlobImports from 'vite-plugin-sass-glob-import';
 import removeConsole from "vite-plugin-remove-console";
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import babel from '@rollup/plugin-babel';
- 
+import vue from '@vitejs/plugin-vue'
 
 const PATHS = {
     src: path.join(__dirname, './resources'),
@@ -22,9 +22,12 @@ const config = <UserConfig> defineConfig({
         minify: isProduction,
         rollupOptions: { 
             input: {
-                 application: PATHS.src + '/js/application.js',
-                 vendors: PATHS.src + '/js/vendors.js',
-                 applicationCss: PATHS.src + '/scss/application.scss',
+               //  application: PATHS.src + '/js/application.js',
+                // vendors: PATHS.src + '/js/vendors.js',
+                 application: PATHS.src + '/scss/application.scss',
+                 'css/test/application': PATHS.src + '/scss/test/application.scss',
+
+             //    'vue/application' : PATHS.src + '/vue/application.js'
             },
             output: {
                 dir: PATHS.dist,
@@ -64,7 +67,9 @@ const config = <UserConfig> defineConfig({
               }
             ]
         })*/
+    //    vue(),
     ],
+   
     resolve: {
         alias: {
             "~": path.join(__dirname, "/node_modules"),
