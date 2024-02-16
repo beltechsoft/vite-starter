@@ -1,43 +1,58 @@
-import { defineConfig, UserConfig } from 'vite';
+import { defineConfig, UserConfig, loadEnv, build, ViteDevServer } from 'vite';
 import path from 'path';
 import sassGlobImports from 'vite-plugin-sass-glob-import';
 import removeConsole from "vite-plugin-remove-console";
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-import babel from '@rollup/plugin-babel';
-import vue from '@vitejs/plugin-vue'
+import babel, { getBabelOutputPlugin } from '@rollup/plugin-babel';
+import vue from '@vitejs/plugin-vue';
+import chokidar from 'chokidar'
+
+
+process.env = {...process.env, ...loadEnv(process.env.NODE_ENV, process.cwd())};
 
 const PATHS = {
     src: path.join(__dirname, './resources'),
     dist: path.join(__dirname, './assets'),
 }
 
-let isProduction = process.env.NODE_ENV === 'production' && !process.argv.includes('--watch');
-isProduction = false;
+let isProduction = process.env.NODE_ENV === 'production';
+console.log(process.env.NODE_ENV);
+const hmr = () => ({
+    name: 'configure-server',
+    configureServer(server) {
+        const reload = (path: string) => {
+            server.ws.send({ type: 'full-reload', path: '*'});
+        }
+        const watcher = chokidar.watch( ['**/*.js', '**/*.css', '**/*.htm' ], {
+            usePolling: true,
+        });
+
+        watcher.on('add', reload).on('change', reload)
+    },
+});
 
 const config = <UserConfig> defineConfig({    
-    base: '/assets/',
-    esbuild: false,
+  //  base: '/themes/museum/assets/',
     build: {
-        sourcemap: !isProduction,
-        minify: isProduction,
+        sourcemap: false,
         rollupOptions: { 
             input: {
-               //  application: PATHS.src + '/js/application.js',
-                // vendors: PATHS.src + '/js/vendors.js',
-                 application: PATHS.src + '/scss/application.scss',
-                 'css/test/application': PATHS.src + '/scss/test/application.scss',
-
-             //    'vue/application' : PATHS.src + '/vue/application.js'
+                application: PATHS.src + '/js/application.js',
+                vendors: PATHS.src + '/js/vendors.js',
+                 //application: PATHS.src + '/scss/application.scss',
+                // 'css/test/application': PATHS.src + '/scss/test/application.scss',
+                 'vue/application' : PATHS.src + '/vue/application.js'
             },
             output: {
                 dir: PATHS.dist,
                 entryFileNames:  'js/[name].js',
                 assetFileNames: (assetInfo) => {
-                    const normalizeAssetInfo = path.normalize(assetInfo.name);
-                    const normalizePathAssets = path.normalize(PATHS.src + '/assets/');
-                
-                    if(normalizeAssetInfo.includes(normalizePathAssets)){
-                        return normalizeAssetInfo.replace(normalizePathAssets, '').replace(/\\/g, "/");
+                    if(/\.(png|jpg|gif|svg)$/.test(assetInfo.name)){
+                        return'images/[name].[ext]';
+                    }
+
+                    if(/\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/.test(assetInfo.name)){
+                        return'fonts/[name].[ext]';
                     }
 
                     if(assetInfo.name?.endsWith('.css')){
@@ -57,17 +72,14 @@ const config = <UserConfig> defineConfig({
         },
     },
     plugins: [
-        babel({ babelHelpers: 'bundled' }),
+        vue(),
+        hmr(),
+      //  getBabelOutputPlugin({ presets: ['@babel/preset-env']}),
+
+      //  babel({ babelHelpers: 'bundled' }),
         sassGlobImports(),
-        /*viteStaticCopy({
-            targets: [
-              {
-                src:  normalizePath(path.resolve(__dirname, './resources/assets/*')),
-                dest: normalizePath(path.resolve(__dirname, './assets'))
-              }
-            ]
-        })*/
-    //    vue(),
+    
+    
     ],
    
     resolve: {
@@ -76,21 +88,23 @@ const config = <UserConfig> defineConfig({
         },
         extensions: ['.scss', '.css', '.js'],
     },
-     hmr: {
-            protocol: 'wss',
-           // overlay: false
-        },
     server: {
+    
+        hmr: {
+            // Do not use encrypted connections for the HMR websocket.
+         //   protocol: 'ws',
+
+        },   
         watch: {
-          usePolling: true,
+            usePolling: true,
         }
-      },
+      }, 
 });
 
 // Babel
 if (isProduction) {    
-    config.plugins?.push(removeConsole())
-
+    config.plugins?.push(getBabelOutputPlugin({ presets: ['@babel/preset-env'] }));
 }
-
+//
+//
 export default config;

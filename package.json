@@ -2,25 +2,29 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "cross-env NODE_ENV=development vite build -d --mode=development",
+    "server": "cross-env NODE_ENV=development vite --mode=development",
     "build": "vite build",
-    "preview": "vite preview",
-    "watch": "vite build --watch"
+    "watch": "cross-env NODE_ENV=development vite build --watch --mode=development"
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",
+    "@babel/plugin-transform-runtime": "^7.23.9",
     "@babel/preset-env": "^7.23.3",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@types/node": "^18.15.11",
+    "@vitejs/plugin-vue": "^5.0.3",
     "autoprefixer": "^10.4.14",
+    "core-js": "^2.6.12",
+    "cross-env": "^7.0.3",
     "rollup-plugin-progress": "^1.1.2",
     "sass": "^1.60.0",
     "terser": "^5.18.1",
     "vite": "^5.0.0",
     "vite-plugin-remove-console": "^2.1.1",
-    "vite-plugin-static-copy": "0.17.1",
-    "vite-plugin-sass-glob-import": "^3.0.2"
+    "vite-plugin-sass-glob-import": "^3.0.2",
+    "vite-plugin-static-copy": "0.17.1"
   },
   "browserslist": [
     "last 2 Chrome versions",
@@ -29,6 +33,7 @@
     "IE >= 10"
   ],
   "dependencies": {
+    "@vitejs/plugin-vue-jsx": "^3.1.0",
     "foundation-sites": "^6.7.5",
     "jquery": "^3.7.1",
     "normalize.css": "^8.0.1",
