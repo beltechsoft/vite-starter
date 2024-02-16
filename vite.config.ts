@@ -34,16 +34,19 @@ const hmr = () => ({
 const config = <UserConfig> defineConfig({    
   //  base: '/themes/museum/assets/',
     build: {
-        sourcemap: false,
+        sourcemap: true,
+        target: 'ESM',
+       // minify: 'terser',
+        ssr: false,
         rollupOptions: { 
             input: {
-                application: PATHS.src + '/js/application.js',
-                vendors: PATHS.src + '/js/vendors.js',
+               // application: PATHS.src + '/js/application.js',
+                //vendors: PATHS.src + '/js/vendors.js',
                  //application: PATHS.src + '/scss/application.scss',
                 // 'css/test/application': PATHS.src + '/scss/test/application.scss',
                  'vue/application' : PATHS.src + '/vue/application.js'
             },
-            output: {
+            output: {  
                 dir: PATHS.dist,
                 entryFileNames:  'js/[name].js',
                 assetFileNames: (assetInfo) => {
